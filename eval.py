@@ -1,6 +1,6 @@
 import torch
 import torch.nn.functional as F
-from tqdm import tqdm
+from tqdm import tqdm_notebook as tqdm
 
 from dice_loss import dice_coeff
 

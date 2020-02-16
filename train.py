@@ -7,7 +7,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch import optim
-from tqdm import tqdm
+from tqdm import tqdm_notebook as tqdm
 
 from eval import eval_net
 from unet import UNet
@@ -89,6 +89,7 @@ def train_net(net,
                 global_step += 1
                 if global_step % (len(dataset) // (10 * batch_size)) == 0:
                     val_score = eval_net(net, val_loader, device, n_val)
+                    net.train()
                     if net.n_classes > 1:
                         logging.info('Validation cross entropy: {}'.format(val_score))
                         writer.add_scalar('Loss/test', val_score, global_step)
