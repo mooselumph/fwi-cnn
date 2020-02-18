@@ -60,3 +60,47 @@ class BasicDataset(Dataset):
         mask = self.preprocess(mask, self.scale)
 
         return {'image': torch.from_numpy(img), 'mask': torch.from_numpy(mask)}
+
+
+
+# Generate Dataset object populated using forward model
+class SimpleModelDataset(Dataset):
+
+    def __init__(self,model,n_layers=(5,15),thickness=100,speed=(2000,500),n_iters):
+
+        # n_layers = (lower bound, upper bound) ~ Uniform
+        # thickness = mean thickness ~ Poisson
+        # speed = (mean, stdv) ~ Normal
+
+        self.model = model
+
+        self.n_layers = n_layers
+        self.thickness = thickness
+        self.speed = speed
+
+        self.n_iters = n_iters
+
+    def __len__():
+
+        return self.n_iters
+
+    def __getitem__(self):
+
+        # Update depths according to Poisson distribution
+        
+        n_layers = np.random.randint(*self.n_layers)
+
+        thicknesses = [1,np.random.poisson(self.thickness,size=(n_layers-1,))]
+        depths = np.cum_sum(thicknesses)
+
+        self.model.depths = depths
+
+        times, amplitudes = self.model.propagateSmallAngle(0.01) 
+
+        # Generate speed profile
+
+        speeds = np.random.normal(*self.speed,size=(n_layers-1,))
+        np.insert(0,speeds[0])
+        
+        return amplitudes, depths
+
