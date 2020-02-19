@@ -27,7 +27,7 @@ def plot_speeds(speeds,speeds_pred):
     """Create a pyplot plot and save to buffer."""
     
     
-    plt.figure()
+    f = plt.figure()
     plt.plot(speeds,label='True Speeds')
     plt.plot(speeds_pred,label='Predicted Speeds')
 
@@ -37,5 +37,35 @@ def plot_speeds(speeds,speeds_pred):
     
     image = PIL.Image.open(buf)
     image = ToTensor()(image).unsqueeze(0)
+    
+    #image = image.detach().cpu().numpy().squeeze().transpose(1,2,0)
+    image = image[:,0:3,:,:]
+    
+    plt.close(f)
+    
+    return image
+
+
+def plot_amplitudes(amps):
+    """Create a pyplot plot and save to buffer."""
+    
+    f = plt.figure()
+    
+    amps = amps.detach().cpu().numpy()
+    amps = amps[0,0,:,:].squeeze()
+    
+    plt.imshow(amps,cmap='gray')
+    
+
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png')
+    buf.seek(0)
+    
+    image = PIL.Image.open(buf)
+    image = ToTensor()(image).unsqueeze(0)
+    
+    image = image[:,0:3,:,:]
+    
+    plt.close(f)
     
     return image

@@ -11,7 +11,7 @@ from torch.utils.data import DataLoader
 
 from forward.simple_model import SimpleLayerModel, SimpleLayerDataset
 
-from utils.data_vis import plot_speeds
+from utils.data_vis import plot_speeds, plot_amplitudes
 
 
 
@@ -86,7 +86,7 @@ def train_net(net,
                 pbar.update()
                 global_step += 1
                 
-                if global_step % (n_train // (10 * batch_size)) == 0:
+                if global_step % (n_train // (10 * batch_size)) == 1:
                     
                     #val_score = eval_net(net, val_loader, device, n_val)
                     #net.train()
@@ -94,12 +94,14 @@ def train_net(net,
                     #logging.info('Validation cross entropy: {}'.format(val_score))
                     #writer.add_scalar('Loss/test', val_score, global_step)
 
-                    writer.add_images('images', imgs, global_step)
+                    amps_plot = plot_amplitudes(imgs)
+                    
+                    writer.add_images('images', amps_plot, global_step)
                     
                     speeds_plot = plot_speeds(speeds.detach().cpu().numpy(),
                                               speeds_pred.detach().cpu().numpy())
 
-                    #writer.add_images('speeds', speeds_plot, global_step)
+                    writer.add_images('speeds', speeds_plot, global_step)
 
 
         

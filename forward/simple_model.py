@@ -135,8 +135,11 @@ class SimpleLayerDataset(torch.utils.data.IterableDataset):
         return self.n_samples
         
     def __iter__(self):
+        
+        worker_info = torch.utils.data.get_worker_info()
+        my_samples = self.n_samples // worker_info.num_workers
 
-        for i in range(self.n_samples):
+        for i in range(my_samples):
             
             amplitudes, speeds = self.problem.generate_pair()
             
