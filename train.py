@@ -104,6 +104,7 @@ def train_net(net,
 
                     writer.add_images('speeds', speeds_plot, global_step)
 
+    writer.close()
 
         
         
