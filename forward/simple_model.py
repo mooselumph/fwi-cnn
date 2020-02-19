@@ -96,11 +96,12 @@ class SimpleLayerProblem():
         while True:
             
             thickness = np.random.poisson(self.thickness)
-            depth += thickness
             speed = np.random.uniform(*self.speed)
             
             speeds_sparse[int(depth/self.interval):] = speed
-                        
+            
+            depth += thickness
+                                   
             if depth > self.n_samples*self.interval:
                 break
                         
