@@ -67,8 +67,7 @@ class SimpleLayerModel():
         return times, amplitudes
 
 
-# Generate Dataset object populated using forward model
-class SimpleLayerDataset(torch.utils.data.IterableDataset):
+class SimpleLayerProblem():
 
     def __init__(self,model,n_samples=200,interval=5,thickness=100,speed=(1000,3000)):
 
@@ -83,10 +82,9 @@ class SimpleLayerDataset(torch.utils.data.IterableDataset):
         self.speed = speed
         
         self.model.duration = 2*n_samples*interval/speed[0]
-
-
-    def __iter__(self):
-
+        
+    def generate_pair(self):
+    
         # Generate depths according to Poisson distribution
         
         depth = 0
@@ -94,7 +92,6 @@ class SimpleLayerDataset(torch.utils.data.IterableDataset):
         thicknesses = []
         
         speeds_sparse = np.zeros(self.n_samples)
-        
         
         while True:
             
@@ -120,10 +117,32 @@ class SimpleLayerDataset(torch.utils.data.IterableDataset):
         self.model.speeds = np.array(speeds)
 
         times, amplitudes = self.model.propagateSmallAngle() 
+        
+        return amplitudes, speeds_sparse 
+    
 
+
+class SimpleLayerDataset(torch.utils.data.IterableDataset):
+
+    def __init__(self,problem,n_samples=1000):
+
+        self.problem = problem        
+        self.n_samples = n_samples
         
+    def __len__(self):
         
-        return amplitudes, speeds_sparse
+        return self.n_samples
+        
+    def __iter__(self):
+
+        for i in range(self.n_samples):
+            
+            amplitudes, speeds = self.problem.generate_pair()
+            
+            # Channels first.
+            amplitudes = amplitudes.transpose(2,0,1)            
+                        
+            yield {'amplitudes': torch.from_numpy(amplitudes), 'speeds': torch.from_numpy(speeds)}
     
     
     

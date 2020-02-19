@@ -1,5 +1,11 @@
 import matplotlib.pyplot as plt
 
+import io
+import matplotlib.pyplot as plt
+import PIL.Image
+from torchvision.transforms import ToTensor
+
+
 
 def plot_img_and_mask(img, mask):
     classes = mask.shape[2] if len(mask.shape) > 2 else 1
@@ -15,3 +21,21 @@ def plot_img_and_mask(img, mask):
         ax[1].imshow(mask)
     plt.xticks([]), plt.yticks([])
     plt.show()
+
+
+def plot_speeds(speeds,speeds_pred):
+    """Create a pyplot plot and save to buffer."""
+    
+    
+    plt.figure()
+    plt.plot(speeds,label='True Speeds')
+    plt.plot(speeds_pred,label='Predicted Speeds')
+
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png')
+    buf.seek(0)
+    
+    image = PIL.Image.open(buf)
+    image = ToTensor()(image).unsqueeze(0)
+    
+    return image
