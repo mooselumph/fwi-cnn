@@ -22,14 +22,15 @@ def train_net(net,
               epochs=5,
               batch_size=1,
               lr=0.1,
+              val_interval = 500,
               save_cp=True):
     
     
     n_train = len(train_dataset)
     n_val = len(val_dataset)
     
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, num_workers=8, pin_memory=True)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, num_workers=8, pin_memory=True)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, num_workers=5, pin_memory=True)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, num_workers=5, pin_memory=True)
 
     writer = SummaryWriter(comment=f'LR_{lr}_BS_{batch_size}')
     global_step = 0
@@ -68,11 +69,11 @@ def train_net(net,
                     'the net is configured correctly.'
         
                 imgs = imgs.to(device=device, dtype=torch.float32)
-                speeds = speeds.to(device=device, dtype=torch.float32)
+                speeds = speeds.to(device=device, dtype=torch.float32).squeeze()
         
         
                 speeds_pred = net(imgs)
-                loss = criterion(speeds_pred, speeds.squeeze())
+                loss = criterion(speeds_pred, speeds)
                 
                 epoch_loss += loss.item()
                 writer.add_scalar('Loss/train', loss.item(), global_step)
@@ -86,7 +87,7 @@ def train_net(net,
                 pbar.update()
                 global_step += 1
                 
-                if global_step % (n_train // (10 * batch_size)) == 1:
+                if global_step % val_interval == 1:
                     
                     #val_score = eval_net(net, val_loader, device, n_val)
                     #net.train()

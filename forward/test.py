@@ -30,6 +30,9 @@ plt.figure()
 
 plt.plot(s)
 
-img = plot_speeds(s,s)
+img = plot_speeds(s,s/2)
 
 nimg = img.detach().cpu().numpy().squeeze().transpose(1,2,0)
+
+plt.figure()
+plt.imshow(nimg)

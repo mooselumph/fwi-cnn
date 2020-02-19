@@ -137,7 +137,10 @@ class SimpleLayerDataset(torch.utils.data.IterableDataset):
     def __iter__(self):
         
         worker_info = torch.utils.data.get_worker_info()
-        my_samples = self.n_samples // worker_info.num_workers
+        if worker_info is None:
+            my_samples = self.n_samples
+        else:
+            my_samples = self.n_samples // worker_info.num_workers
 
         for i in range(my_samples):
             

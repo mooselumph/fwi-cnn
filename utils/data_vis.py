@@ -30,6 +30,7 @@ def plot_speeds(speeds,speeds_pred):
     f = plt.figure()
     plt.plot(speeds,label='True Speeds')
     plt.plot(speeds_pred,label='Predicted Speeds')
+    plt.legend()
 
     buf = io.BytesIO()
     plt.savefig(buf, format='png')
