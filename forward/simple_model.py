@@ -69,7 +69,7 @@ class SimpleLayerModel():
 
 class SimpleLayerProblem():
 
-    def __init__(self,model,n_samples=200,interval=5,thickness=100,speed=(1000,3000)):
+    def __init__(self,model,n_samples=200,interval=5,thickness=100,speed=(1000,3000),mode='diff'):
 
         # thickness = mean thickness ~ Poisson
         # speed = (low, high) ~ Uniform
@@ -80,6 +80,7 @@ class SimpleLayerProblem():
         self.interval = interval
         self.thickness = thickness
         self.speed = speed
+        self.mode = mode
         
         self.model.duration = 2*n_samples*interval/speed[0]
         
@@ -118,6 +119,9 @@ class SimpleLayerProblem():
         self.model.speeds = np.array(speeds)
 
         times, amplitudes = self.model.propagateSmallAngle() 
+        
+        if self.mode == 'diff':
+            speeds_sparse = np.diff(speeds_sparse,prepend=0)
         
         return amplitudes, speeds_sparse 
     
