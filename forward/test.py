@@ -11,10 +11,10 @@ import matplotlib.pyplot as plt
 
 from utils.data_vis import plot_speeds
 
-m = SimpleLayerModel([],[],source_pos = [75],detector_pos=np.arange(0,2500,10),
-                     sample_period=0.01,duration=[],pulse_width=0.02)
+m = SimpleLayerModel([],[],source_pos = [75],detector_pos=np.arange(0,3200,100),
+                     sample_period=0.01,duration=512*0.01,pulse_width=0.02)
 
-p = SimpleLayerProblem(m,n_samples=100,interval=5,thickness=100,speed=(1000,3000))
+p = SimpleLayerProblem(m,n_samples=256,interval=10,thickness=500,speed=(200,500))
 
 d = SimpleLayerDataset(p,n_samples=2)
 
