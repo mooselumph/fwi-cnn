@@ -54,7 +54,8 @@ class SimpleLayerModel():
                     T = T.reshape(1,nd)
                     
                     a = self.pulse_width                
-                    A = 2/(np.sqrt(3*a)*(np.pi**0.25))
+                    #A = 2/(np.sqrt(3*a)*(np.pi**0.25))
+                    A = 1
                     
                     t = np.tile((np.arange(nt)*self.sample_period).reshape(-1,1),(1,nd))
                     t -= T
@@ -69,7 +70,7 @@ class SimpleLayerModel():
 
 class SimpleLayerProblem():
 
-    def __init__(self,model,n_samples=200,interval=5,thickness=300,speed=(500,1000),mode='normal'):
+    def __init__(self,model,n_samples=200,interval=5,thickness=300,speed=(500,1000),mode='normal',normalize=True):
 
         # thickness = mean thickness ~ Poisson
         # speed = (low, high) ~ Uniform
@@ -81,6 +82,8 @@ class SimpleLayerProblem():
         self.thickness = thickness
         self.speed = speed
         self.mode = mode
+        
+        self.normalize = normalize
         
         #self.model.duration = 2*n_samples*interval/speed[0]
         
@@ -95,6 +98,9 @@ class SimpleLayerProblem():
         speeds_sparse = np.zeros(self.n_samples)
         
         speed = self.speed[1]
+        
+        mean_n_layers = self.n_samples*self.interval/self.thickness
+        mean_max_speed = mean_n_layers*np.mean(self.speed)
         
         while True:
             
@@ -121,6 +127,9 @@ class SimpleLayerProblem():
         self.model.speeds = np.array(speeds)
 
         times, amplitudes = self.model.propagateSmallAngle() 
+        
+        if self.normalize:
+            speeds_sparse = speeds_sparse/mean_max_speed
         
         if self.mode == 'diff':
             speeds_sparse = np.diff(speeds_sparse,prepend=0)

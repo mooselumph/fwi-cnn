@@ -25,6 +25,7 @@ for batch in d:
 plt.figure(figsize=(8,8))
 
 plt.imshow(a[0,:,:],cmap='gray',aspect='auto')
+plt.colorbar()
 
 plt.figure()
 
