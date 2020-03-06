@@ -99,8 +99,8 @@ def train_net(net,
                     
                     writer.add_images('images', amps_plot, global_step)
                     
-                    speeds_plot = plot_speeds(speeds.detach().cpu().numpy(),
-                                              speeds_pred.detach().cpu().numpy().squeeze())
+                    speeds_plot = plot_speeds(speeds.detach().cpu().numpy()[0],
+                                              speeds_pred.detach().cpu().numpy()[0].squeeze())
 
                     writer.add_images('speeds', speeds_plot, global_step)
 
