@@ -105,11 +105,11 @@ class SimpleLayerProblem():
             
             depth += thickness
                                    
-            if depth > self.n_samples*self.interval:
-                break
-                        
             thicknesses.append(thickness)            
             speeds.append(speed)
+            
+            if depth > self.n_samples*self.interval:
+                break
 
                    
         # Add direct path

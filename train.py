@@ -73,7 +73,7 @@ def train_net(net,
         
         
                 speeds_pred = net(imgs)
-                loss = criterion(speeds_pred, speeds)
+                loss = criterion(speeds_pred.squeeze(), speeds.squeeze())
                 
                 epoch_loss += loss.item()
                 writer.add_scalar('Loss/train', loss.item(), global_step)
@@ -100,7 +100,7 @@ def train_net(net,
                     writer.add_images('images', amps_plot, global_step)
                     
                     speeds_plot = plot_speeds(speeds.detach().cpu().numpy(),
-                                              speeds_pred.detach().cpu().numpy())
+                                              speeds_pred.detach().cpu().numpy().squeeze())
 
                     writer.add_images('speeds', speeds_plot, global_step)
 
