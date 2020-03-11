@@ -113,14 +113,15 @@ class VanillaNet(nn.Module):
         # N x 32  x 64
         # N x 16  x 128
         # N x 1   x 256
-        
+        bilinear = False
+
         self.up =  nn.Sequential(
-                Up(512,256,scale_factor=8),     # N x 256 x 8
-                Up(256,128),                    
-                Up(128,64),                     
-                Up(64,32),                      
-                Up(32,16),
-                Up(16,1), # N x 1   x 256
+                Up(512,256,scale_factor=8,bilinear=bilinear),     # N x 256 x 8
+                Up(256,128,bilinear=bilinear),                    
+                Up(128,64,bilinear=bilinear),                     
+                Up(64,32,bilinear=bilinear),                      
+                Up(32,16,bilinear=bilinear),
+                Up(16,1,bilinear=bilinear), # N x 1   x 256
             )
 
     def forward(self, x):
@@ -129,6 +130,8 @@ class VanillaNet(nn.Module):
         
         x = torch.flatten(x,start_dim=2) # N x 512 x 1
         
-        x = self.up(x)
+        x = self.up(x) # N x 1 x 256
+        
+        x = x.squeeze(dim=1) # N x 256
         
         return x

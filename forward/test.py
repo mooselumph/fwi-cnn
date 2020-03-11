@@ -4,6 +4,7 @@ Created on Mon Feb 17 20:54:37 2020
 
 @author: mooselumph
 """
+from torch.utils.data import DataLoader
 
 from forward.simple_model import SimpleLayerDataset, SimpleLayerProblem, SimpleLayerModel
 import numpy as np
@@ -16,12 +17,18 @@ m = SimpleLayerModel([],[],source_pos = [75],detector_pos=np.arange(0,3200,100),
 
 p = SimpleLayerProblem(m,n_samples=256,interval=10,thickness=500,speed=(200,500))
 
-d = SimpleLayerDataset(p,n_samples=2)
+d = SimpleLayerDataset(p,n_samples=10)
 
-for batch in d:
-    a = batch['amplitudes']
-    s = batch['speeds']
+loader = DataLoader(d, batch_size=5)
+        
+
+for batch in loader:
+    a = batch['X']
+    s = batch['Y']
     
+
+# %%    
+
 plt.figure(figsize=(8,8))
 
 plt.imshow(a[0,:,:],cmap='gray',aspect='auto')

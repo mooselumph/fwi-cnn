@@ -14,26 +14,37 @@ from forward.simple_model import SimpleLayerModel, SimpleLayerDataset
 from utils.data_vis import plot_speeds, plot_amplitudes
 
 
-
 def train_net(net,
               train_dataset,
               val_dataset,
-              device,
+              device = None,
               epochs=5,
               batch_size=1,
+              n_subbatches=1,
               lr=0.1,
+              optimizer = None,
+              scheduler = None,
               val_interval = 500,
-              save_cp=True):
+              save_dir=None,
+              callbacks
+              ):
     
     
     n_train = len(train_dataset)
     n_val = len(val_dataset)
     
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, num_workers=5, pin_memory=True)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, num_workers=5, pin_memory=True, worker_init_fn=lambda x: np.random.seed())
     val_loader = DataLoader(val_dataset, batch_size=batch_size, num_workers=5, pin_memory=True)
 
     writer = SummaryWriter(comment=f'LR_{lr}_BS_{batch_size}')
     global_step = 0
+    
+    if device is None:
+        device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
+
+    net.to(device=device)
+    # faster convolutions, but more memory
+    # cudnn.benchmark = True
     
     logging.info(f'''Starting training:
         Epochs:          {epochs}
@@ -44,10 +55,10 @@ def train_net(net,
         Checkpoints:     {save_cp}
         Device:          {device.type}
     ''')
-    
-    
-    optimizer = optim.RMSprop(net.parameters(), lr=lr, weight_decay=1e-8)
-    
+
+    if optimizer is None:
+        optimizer = optim.RMSprop(net.parameters(), lr=lr, weight_decay=1e-8)
+            
     criterion = nn.MSELoss()
     
     net.train()
@@ -55,10 +66,11 @@ def train_net(net,
     for epoch in range(epochs):
         
         epoch_loss = 0
+        loss = 0
         
         with tqdm(total=np.ceil(n_train/batch_size), desc=f'Epoch {epoch + 1}/{epochs}', unit='img') as pbar:
             
-            for batch in train_loader:
+            for (k,batch) in enumerate(train_loader):
         
                 imgs = batch['amplitudes']
                 speeds = batch['speeds']
@@ -71,19 +83,19 @@ def train_net(net,
                 imgs = imgs.to(device=device, dtype=torch.float32)
                 speeds = speeds.to(device=device, dtype=torch.float32).squeeze()
         
-        
                 speeds_pred = net(imgs)
-                loss = criterion(speeds_pred.squeeze(), speeds.squeeze())
+                loss += criterion(speeds_pred.squeeze(), speeds.squeeze())
                 
                 epoch_loss += loss.item()
                 writer.add_scalar('Loss/train', loss.item(), global_step)
                 pbar.set_postfix(**{'loss (batch)': loss.item()})
 
-                optimizer.zero_grad()
-                loss.backward()
-                optimizer.step()
-        
-        
+                if k % n_subbatches == 0:
+    
+                    optimizer.zero_grad()
+                    loss.backward()
+                    optimizer.step()
+                
                 pbar.update()
                 global_step += 1
                 
@@ -103,8 +115,20 @@ def train_net(net,
                                               speeds_pred.detach().cpu().numpy()[0].squeeze())
 
                     writer.add_images('speeds', speeds_plot, global_step)
+         
+        if save_dir:
+            try:
+                os.mkdir(save_dir)
+            except OSError:
+                pass
+            torch.save(net.state_dict(),
+                       dir_checkpoint + f'CP_epoch{epoch + 1}.pth')
+            logging.info(f'Checkpoint {epoch + 1} saved !')
+            
+         # TODO: Add contingency for when validation loss is used in scheduler           
+         if scheduler:
+            scheduler.step()
 
     writer.close()
 
-        
         

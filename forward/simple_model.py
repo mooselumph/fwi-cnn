@@ -164,7 +164,7 @@ class SimpleLayerDataset(torch.utils.data.IterableDataset):
             # Channels first.
             amplitudes = amplitudes.transpose(2,0,1)            
                         
-            yield {'amplitudes': torch.from_numpy(amplitudes), 'speeds': torch.from_numpy(speeds)}
+            yield {'X': torch.from_numpy(amplitudes), 'Y': torch.from_numpy(speeds)}
     
     
     
